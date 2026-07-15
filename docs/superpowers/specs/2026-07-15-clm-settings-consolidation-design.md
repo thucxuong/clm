@@ -257,3 +257,61 @@ If `clm unpack` fails (most likely because `cl-settings` still isn't
 present, e.g. no slug was given and it was never cloned), the script exits
 nonzero with that command's own clear error — consistent with letting
 `clm::die` own that message rather than duplicating it here.
+
+## Addendum (2026-07-16): `clm unpack` also restores extensions and npm/pnpm globals
+
+Previously `clm unpack` only restored dotfiles, vault, and `brew bundle`.
+The user asked for VS Code/Cursor extensions and npm/pnpm globals to be
+restored automatically too, from the files `clm pack` already captures.
+
+Each restore step is independent and gracefully skipped (not an error) when
+either its pack file is absent or its tool isn't installed — consistent
+with `clm pack`'s own checker pattern.
+
+### Parsing each pack file for restore
+
+- `vscode-extensions.txt` / `cursor-extensions.txt` — already one extension
+  ID per line (`code --list-extensions`'s native format). Restore: for
+  each non-empty line, `code --install-extension <line>` /
+  `cursor --install-extension <line>`.
+- `npm-global.txt` — `npm ls -g --depth=0`'s tree output, e.g.:
+  ```
+  /Users/cluu/.nvm/versions/node/v22.14.0/lib
+  ├── @google/gemini-cli@
+  ├── clerk@1.5.0
+  └── vercel@54.14.2
+  ```
+  Only lines containing the tree connectors (`├──`/`└──`) are dependency
+  lines (the first line is the lib path, not a package). For each such
+  line, strip everything up to the first letter/digit/`@` (removing the
+  box-drawing prefix and space), then strip from the *last* `@` onward to
+  get the bare package name — `${name%@*}` handles both scoped
+  (`@google/gemini-cli@0.0.4` → `@google/gemini-cli`) and unscoped
+  (`clerk@1.5.0` → `clerk`) correctly, since scoped packages have exactly
+  two `@` characters and unscoped exactly one, and `%@*` always removes
+  from the rightmost occurrence. The captured version is intentionally
+  **not** pinned on restore — `npm install -g <name>` installs latest,
+  since global CLI tools generally want to stay current rather than be
+  frozen at capture time.
+- `pnpm-global.txt` — `pnpm list -g --depth=0`'s output, e.g.:
+  ```
+  Legend: production dependency, optional only, dev only
+
+  /Users/cluu/Library/pnpm/global/5
+
+  dependencies:
+  @google/gemini-cli 0.20.2
+  aws-cdk 2.1027.0
+  ```
+  Restore only processes lines *after* the literal `dependencies:` line;
+  for each non-empty line after that, the package name is the first
+  whitespace-separated field (`${line%% *}`), installed via
+  `pnpm add -g <name>` (again unpinned, latest).
+
+### Order in `cmd_unpack`
+
+`stow onboard` → `vault fix-perms` → `brew bundle` → npm globals → pnpm
+globals → VS Code extensions → Cursor extensions. Software install
+(`brew bundle`) runs before the tool-specific restores, since `code`/
+`cursor`/`npm`/`pnpm` may themselves come from Homebrew casks/formulae in
+that same Brewfile and need to exist first.
