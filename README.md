@@ -21,7 +21,7 @@ a private secrets vault, and the `clm` CLI that ties them together.
 - `bin/clm` — the CLI. `lib/clm/*.sh` holds one module per noun.
 - `clm-install.sh` — one-time bootstrap (Homebrew, Stow, puts `clm` on PATH).
 - `pack/` — captured machine-state manifests (Brewfile, extension lists, etc.),
-  produced by `clm pack`. Tracked in git — not secrets, just package/app names.
+  produced by `clm pack`. Gitignored — regenerable, not worth tracking.
 
 ## `clm` commands
 
@@ -32,7 +32,7 @@ a private secrets vault, and the `clm` CLI that ties them together.
     clm vault fix-perms       # fix key file/dir permissions in ~/clm/vault
     clm status                # stow + vault health check
     clm pack list              # show which pack checkers are available here
-    clm pack all                # capture everything available (brew, mas, vscode, cursor, npm, pnpm)
+    clm pack all                # capture everything available, then archive the whole ~/clm tree
     clm pack <checker>          # capture one source, e.g. `clm pack brew`
 
 Every subcommand accepts `--yes` to skip confirmation prompts.
@@ -48,6 +48,15 @@ Every subcommand accepts `--yes` to skip confirmation prompts.
 - All permission fixes (`clm vault fix-perms`) touch only the specific,
   named key directories — never a blanket recursive chmod over `~/clm` or
   `~/clm/vault`.
+
+## Backups
+
+`clm pack all` finishes by archiving the entire `~/clm` tree (dotfiles,
+vault, and the pack output it just generated) into a single timestamped
+`.tar.gz` under `~/clm-backups/` (override with `CLM_BACKUP_DIR`). This
+archive is **not encrypted** — it contains real SSH private keys in
+plaintext, so treat the resulting file with the same care as the keys
+themselves (e.g. only copy it to storage that's already encrypted).
 
 ## Tests
 

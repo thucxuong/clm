@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 CLM_PACK_DIR="${CLM_PACK_DIR:-$CLM_ROOT/pack}"
+CLM_BACKUP_DIR="${CLM_BACKUP_DIR:-$HOME/clm-backups}"
 
 clm::pack_checkers() {
   cat <<'EOF'
@@ -64,6 +65,15 @@ clm::pack_run() {
   esac
 }
 
+clm::pack_archive() {
+  mkdir -p "$CLM_BACKUP_DIR"
+  local timestamp archive
+  timestamp="$(date +%Y%m%d-%H%M%S)"
+  archive="$CLM_BACKUP_DIR/clm-backup-$timestamp.tar.gz"
+  tar czf "$archive" -C "$(dirname "$CLM_ROOT")" "$(basename "$CLM_ROOT")" || clm::die "archive creation failed"
+  echo "archived: -> $archive"
+}
+
 cmd_pack_list() {
   local c
   while IFS= read -r c; do
@@ -90,4 +100,5 @@ cmd_pack_all() {
   while IFS= read -r c; do
     cmd_pack_one "$c"
   done < <(clm::pack_checkers)
+  clm::pack_archive
 }

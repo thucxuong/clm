@@ -103,7 +103,7 @@ EOF
   chmod +x "$FAKE_BIN/npm"
 
   run bash -c "
-    export CLM_ROOT='$CLM_ROOT' CLM_PACK_DIR='$CLM_ROOT/pack'
+    export CLM_ROOT='$CLM_ROOT' CLM_PACK_DIR='$CLM_ROOT/pack' CLM_BACKUP_DIR='$BATS_TEST_TMPDIR/clm-backups'
     export PATH='$FAKE_BIN:/usr/bin:/bin'
     source '$CLM_ROOT/lib/clm/common.sh'
     source '$CLM_ROOT/lib/clm/pack.sh'
@@ -113,4 +113,26 @@ EOF
   [[ "$output" == *"packed: npm ->"* ]]
   [[ "$output" == *"skip (not present): brew"* ]]
   [ -e "$CLM_ROOT/pack/npm-global.txt" ]
+}
+
+@test "cmd_pack_all also produces a full-machine archive" {
+  mkdir -p "$CLM_ROOT/zsh" "$CLM_ROOT/vault/global/ssh/keys"
+  echo 'export FOO=1' > "$CLM_ROOT/zsh/.zshrc"
+  echo 'fake-key-material' > "$CLM_ROOT/vault/global/ssh/keys/id_ed25519"
+  backup_dir="$BATS_TEST_TMPDIR/clm-backups"
+
+  run bash -c "
+    export CLM_ROOT='$CLM_ROOT' CLM_PACK_DIR='$CLM_ROOT/pack' CLM_BACKUP_DIR='$backup_dir'
+    export PATH='/usr/bin:/bin'
+    source '$CLM_ROOT/lib/clm/common.sh'
+    source '$CLM_ROOT/lib/clm/pack.sh'
+    cmd_pack_all
+  "
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"archived: ->"* ]]
+
+  archive="$(find "$backup_dir" -name 'clm-backup-*.tar.gz')"
+  [ -n "$archive" ]
+  tar tzf "$archive" | grep -q "zsh/.zshrc"
+  tar tzf "$archive" | grep -q "vault/global/ssh/keys/id_ed25519"
 }

@@ -27,10 +27,11 @@ EOF
 }
 
 @test "clm pack all works end to end" {
-  run env CLM_ROOT="$CLM_ROOT" CLM_PACK_DIR="$CLM_ROOT/pack" PATH="$FAKE_BIN:/usr/bin:/bin" "$CLM_ROOT/bin/clm" pack all
+  run env CLM_ROOT="$CLM_ROOT" CLM_PACK_DIR="$CLM_ROOT/pack" CLM_BACKUP_DIR="$BATS_TEST_TMPDIR/clm-backups" PATH="$FAKE_BIN:/usr/bin:/bin" "$CLM_ROOT/bin/clm" pack all
   [ "$status" -eq 0 ]
   [[ "$output" == *"packed: mas ->"* ]]
   [[ "$output" == *"skip (not present): brew"* ]]
+  [[ "$output" == *"archived: ->"* ]]
 }
 
 @test "clm pack with an unknown checker name prints usage and exits 1" {
