@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+set -e
+
+resolve_root() {
+  local source="${BASH_SOURCE[0]}"
+  local dir
+  while [ -L "$source" ]; do
+    dir="$(cd -P "$(dirname "$source")" >/dev/null 2>&1 && pwd)"
+    source="$(readlink "$source")"
+    case "$source" in
+      /*) ;;
+      *) source="$dir/$source" ;;
+    esac
+  done
+  cd -P "$(dirname "$source")/.." >/dev/null 2>&1 && pwd
+}
+
+CLM_ROOT="${CLM_ROOT:-$(resolve_root)}"
+export CLM_ROOT
+CLM_TARGET="${CLM_TARGET:-$HOME}"
+export CLM_TARGET
+CLM_VAULT="${CLM_VAULT:-$CLM_ROOT/vault}"
+export CLM_VAULT
+
+# shellcheck source=lib/clm/common.sh
+source "$CLM_ROOT/lib/clm/common.sh"
+# shellcheck source=lib/clm/stow.sh
+source "$CLM_ROOT/lib/clm/stow.sh"
+
+usage() {
+  cat <<'EOF'
+Usage: clm <noun> <verb> [args] [--yes]
+
+Nouns:
+  stow    onboard | add <pkg> | remove <pkg> | list
+EOF
+}
+
+main() {
+  CLM_YES=0
+  filtered=()
+  for a in "$@"; do
+    if [ "$a" = "--yes" ]; then
+      CLM_YES=1
+    else
+      filtered+=("$a")
+    fi
+  done
+  export CLM_YES
+  set -- "${filtered[@]}"
+
+  if [ "$#" -eq 0 ] || [ -z "$1" ]; then
+    usage
+    exit 1
+  fi
+
+  noun="$1"
+  shift
+
+  case "$noun" in
+    stow)
+      verb="${1:-}"
+      [ "$#" -gt 0 ] && shift
+      case "$verb" in
+        onboard) cmd_stow_onboard ;;
+        add) [ -n "${1:-}" ] || clm::die "package name required"; cmd_stow_add "$1" ;;
+        remove) [ -n "${1:-}" ] || clm::die "package name required"; cmd_stow_remove "$1" ;;
+        list) cmd_stow_list ;;
+        *) usage; exit 1 ;;
+      esac
+      ;;
+    *) usage; exit 1 ;;
+  esac
+}
+
+main "$@"
