@@ -5,7 +5,7 @@ load 'test_helper'
 setup() {
   setup_clm_env
   mkdir -p "$CLM_DOTFILES_DIR/ssh/.ssh"
-  cp "$BATS_TEST_DIRNAME/../ssh/.ssh/config" "$CLM_DOTFILES_DIR/ssh/.ssh/config"
+  cp "$BATS_TEST_DIRNAME/fixtures/ssh-config" "$CLM_DOTFILES_DIR/ssh/.ssh/config"
 }
 
 @test "ssh package stows cleanly" {

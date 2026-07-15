@@ -1,0 +1,5 @@
+Include ~/clm/cl-settings/*/vault/global/ssh/config
+Include ~/clm/cl-settings/*/vault/projects/*/ssh/config
+
+Host *
+    IdentitiesOnly yes
