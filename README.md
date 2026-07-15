@@ -20,6 +20,8 @@ a private secrets vault, and the `clm` CLI that ties them together.
   history.
 - `bin/clm` — the CLI. `lib/clm/*.sh` holds one module per noun.
 - `clm-install.sh` — one-time bootstrap (Homebrew, Stow, puts `clm` on PATH).
+- `pack/` — captured machine-state manifests (Brewfile, extension lists, etc.),
+  produced by `clm pack`. Tracked in git — not secrets, just package/app names.
 
 ## `clm` commands
 
@@ -29,6 +31,9 @@ a private secrets vault, and the `clm` CLI that ties them together.
     clm stow list             # show stow state of every package
     clm vault fix-perms       # fix key file/dir permissions in ~/clm/vault
     clm status                # stow + vault health check
+    clm pack list              # show which pack checkers are available here
+    clm pack all                # capture everything available (brew, mas, vscode, cursor, npm, pnpm)
+    clm pack <checker>          # capture one source, e.g. `clm pack brew`
 
 Every subcommand accepts `--yes` to skip confirmation prompts.
 
@@ -54,11 +59,13 @@ they never touch the real `$HOME` or a real Homebrew installation.
 
 ## What's not here yet
 
-- Installing macOS apps/CLI tools (a future `clm install` namespace).
+- Restoring/reinstalling from `clm pack`'s captured manifests on a new
+  machine (a future `clm unpack`).
 - Vaulting tool-managed auth (`gh`, `vercel`, `npm login`, Docker registry).
 - Per-project "active project" switching for single-file configs (`.npmrc`,
   `.env`, docker-compose) — the planned project hub, a future `clm project`
   namespace.
 
-See `docs/superpowers/specs/2026-07-15-clm-foundation-design.md` for the full
-design rationale.
+See `docs/superpowers/specs/2026-07-15-clm-foundation-design.md` and
+`docs/superpowers/specs/2026-07-15-clm-pack-design.md` for the full design
+rationale.
