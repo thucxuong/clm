@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
 
 CLM_TARGET="${CLM_TARGET:-$HOME}"
-CLM_VAULT="${CLM_VAULT:-${CLM_ROOT:-.}/vault}"
+
+clm::machine_name() {
+  echo "${CLM_MACHINE_NAME:-$(scutil --get ComputerName)}"
+}
+
+CLM_MACHINE_NAME="$(clm::machine_name)"
+CLM_SETTINGS_DIR="${CLM_SETTINGS_DIR:-${CLM_ROOT:-.}/cl-settings/$CLM_MACHINE_NAME}"
+CLM_DOTFILES_DIR="${CLM_DOTFILES_DIR:-$CLM_SETTINGS_DIR/dotfiles}"
+CLM_VAULT="${CLM_VAULT:-$CLM_SETTINGS_DIR/vault}"
 
 clm::die() {
   echo "clm: $*" >&2
