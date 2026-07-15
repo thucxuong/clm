@@ -104,3 +104,42 @@ git -C ~/clm add pack && git -C ~/clm commit -m "Update machine pack"
 On a new machine, `pack/Brewfile` can already be consumed directly via
 `brew bundle --file=pack/Brewfile` even before a dedicated `clm unpack`
 command exists — the other manifests are for now read as reference.
+
+## Addendum (2026-07-15): gitignore pack/, and a full-machine archive
+
+After building the first pass, the user clarified two changes:
+
+1. **`pack/` output is not committed.** It's regenerable machine-state noise,
+   not something worth version-controlling. Add `pack/` to `.gitignore`.
+2. **`clm pack all` also produces a single compressed, ad-hoc archive** —
+   not just the individual manifest files, but a full snapshot combining
+   the pack output, the dotfiles packages, and vault (including real keys)
+   into one portable `.tar.gz` file. This is for manual/occasional full
+   backup (copy to a USB drive, cloud storage, etc.), separate from the
+   git-based recovery story for the dotfiles/vault repos themselves.
+
+### Archive scope and mechanics
+
+Since `vault/` is a plain subdirectory on disk (nested inside `$CLM_ROOT`,
+just gitignored by the outer repo — not excluded from the filesystem), a
+single `tar` over the whole `$CLM_ROOT` tree naturally captures everything:
+`bin/`, `lib/`, the dotfiles packages, `pack/`, and `vault/` in one pass. No
+separate assembly step is needed.
+
+- Output directory: `$CLM_BACKUP_DIR`, default `$HOME/clm-backups` —
+  deliberately outside any git-tracked directory, so the archive can never
+  end up in a repo by accident.
+- Filename: `clm-backup-<YYYYmmdd-HHMMSS>.tar.gz`.
+- **Not encrypted** — a deliberate choice by the user (plain `tar czf`). The
+  archive contains real SSH private keys in plaintext; safe storage/transport
+  of the resulting file is the user's responsibility, not something this
+  tool enforces.
+- Runs as the final step of `cmd_pack_all()` only — single-checker runs
+  (`clm pack brew`, etc.) are unaffected and still just write their own file.
+
+### Deferred
+
+- Pushing the dotfiles/vault repos to remotes (e.g. via `gh repo create`) is
+  a related but separate one-time operational task, not part of this
+  archive mechanism — it involves creating real external resources under
+  the user's account and is handled as its own explicit action, not CLI code.
