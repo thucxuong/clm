@@ -26,6 +26,10 @@ export CLM_VAULT
 source "$CLM_ROOT/lib/clm/common.sh"
 # shellcheck source=lib/clm/stow.sh
 source "$CLM_ROOT/lib/clm/stow.sh"
+# shellcheck source=lib/clm/vault.sh
+source "$CLM_ROOT/lib/clm/vault.sh"
+# shellcheck source=lib/clm/status.sh
+source "$CLM_ROOT/lib/clm/status.sh"
 
 usage() {
   cat <<'EOF'
@@ -33,6 +37,8 @@ Usage: clm <noun> <verb> [args] [--yes]
 
 Nouns:
   stow    onboard | add <pkg> | remove <pkg> | list
+  vault   fix-perms
+  status
 EOF
 }
 
@@ -69,6 +75,15 @@ main() {
         *) usage; exit 1 ;;
       esac
       ;;
+    vault)
+      verb="${1:-}"
+      [ "$#" -gt 0 ] && shift
+      case "$verb" in
+        fix-perms) cmd_vault_fix_perms ;;
+        *) usage; exit 1 ;;
+      esac
+      ;;
+    status) cmd_status ;;
     *) usage; exit 1 ;;
   esac
 }
