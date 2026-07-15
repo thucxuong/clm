@@ -186,3 +186,74 @@ The current real repo has dotfiles directly at its root and a standalone
    `vault_cmd_test.bats`, `status_test.bats`, `pack_test.bats`,
    `pack_dispatch_test.bats`, `ssh_package_test.bats`, `test_helper.bash`)
    to set up the new nested structure instead of a flat one.
+
+## Addendum (2026-07-16): fully automated, resumable bootstrap
+
+After the consolidation shipped, the user asked for the new-machine flow to
+be one command: `clm-install.sh` should install dependencies, authenticate
+`gh`, clone `cl-settings`, and run `clm unpack` — all in one go, and safe to
+re-run if interrupted partway (network failure, closed terminal mid-`gh
+auth login`, etc.).
+
+### Repo slug
+
+`gh repo clone` needs an owner/repo slug (e.g. `cluu/cl-settings`). Per the
+user's choice, this is passed as `clm-install.sh`'s first positional
+argument (`./clm-install.sh cluu/cl-settings`), not an env var or an
+interactive prompt — keeping the engine repo itself free of any personal
+data, and keeping the whole flow non-interactive-by-default apart from
+`gh auth login` itself (which is inherently browser-based).
+
+### Clone target: the repo root, not the per-machine subfolder
+
+`cl-settings` holds every machine's folder together
+(`cl-settings/<machine-1>/`, `cl-settings/<machine-2>/`, ...). Cloning must
+target `$CLM_ROOT/cl-settings` (the repo root) — **not** `$CLM_SETTINGS_DIR`
+(`$CLM_ROOT/cl-settings/$CLM_MACHINE_NAME`, this machine's subfolder within
+it). Cloning into the subfolder path directly would be structurally wrong
+(it's cloning the whole repo, which contains a folder per machine, not just
+this one).
+
+### Resumability strategy: idempotency, not a checkpoint file
+
+Rather than tracking progress in a state file, every step in the flow
+checks its own precondition before acting, so re-running the entire script
+from scratch after an interruption is always safe and cheap:
+
+- `ensure_homebrew`/`ensure_stow`/`ensure_gh` — already idempotent (existing
+  behavior, unchanged).
+- `ensure_gh_auth` (new) — checks `gh auth status` first; only runs
+  `gh auth login` if not already authenticated.
+- `ensure_cl_settings` (new) — checks whether `$CLM_ROOT/cl-settings`
+  already exists as a directory; only clones if absent. If absent and no
+  repo slug was given, prints a message and skips (doesn't error) — the
+  final `clm unpack` step will then produce its own clear "cl-settings not
+  found" error, which already exists and already tells the user exactly
+  what to run.
+- The final step is just `clm unpack` itself, which was already written to
+  be idempotent (Stow re-adding an already-correctly-stowed package is a
+  no-op; `fix-perms.sh`'s `chmod` calls are idempotent; `brew bundle` skips
+  already-installed formulae/casks).
+
+No new state file, no explicit "resume from step N" logic — the whole
+script is simply safe to run again.
+
+### Updated `main()`
+
+```
+main() {
+  local settings_repo="${1:-}"
+  ensure_homebrew
+  ensure_stow
+  ensure_gh
+  link_clm_cli
+  ensure_gh_auth
+  ensure_cl_settings "$settings_repo"
+  "$CLM_ROOT/bin/clm" unpack
+}
+```
+
+If `clm unpack` fails (most likely because `cl-settings` still isn't
+present, e.g. no slug was given and it was never cloned), the script exits
+nonzero with that command's own clear error — consistent with letting
+`clm::die` own that message rather than duplicating it here.
