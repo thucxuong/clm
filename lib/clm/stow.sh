@@ -46,7 +46,7 @@ clm::validate_package() {
 cmd_stow_add() {
   local pkg="$1"
   clm::validate_package "$pkg"
-  stow -d "$CLM_ROOT" -t "$CLM_TARGET" "$pkg" || clm::die "stow failed for '$pkg' (see conflicts above)"
+  stow --no-folding -d "$CLM_ROOT" -t "$CLM_TARGET" "$pkg" || clm::die "stow failed for '$pkg' (see conflicts above)"
   echo "stowed: $pkg"
 }
 
@@ -54,7 +54,7 @@ cmd_stow_remove() {
   local pkg="$1"
   clm::validate_package "$pkg"
   clm::confirm "Unstow '$pkg' (remove its symlinks from $CLM_TARGET)?" || clm::die "aborted"
-  stow -D -d "$CLM_ROOT" -t "$CLM_TARGET" "$pkg" || clm::die "unstow failed for '$pkg'"
+  stow --no-folding -D -d "$CLM_ROOT" -t "$CLM_TARGET" "$pkg" || clm::die "unstow failed for '$pkg'"
   echo "unstowed: $pkg"
 }
 
@@ -65,7 +65,7 @@ cmd_stow_onboard() {
       echo "skip (not present): $pkg"
       continue
     fi
-    stow -d "$CLM_ROOT" -t "$CLM_TARGET" "$pkg" || clm::die "stow failed for '$pkg' (see conflicts above)"
+    stow --no-folding -d "$CLM_ROOT" -t "$CLM_TARGET" "$pkg" || clm::die "stow failed for '$pkg' (see conflicts above)"
     echo "stowed: $pkg"
   done
 }

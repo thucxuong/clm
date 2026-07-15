@@ -1,0 +1,21 @@
+[core]
+	editor = code
+
+[branch]
+autosetuprebase = always
+
+[pull]
+rebase = true
+
+[push]
+  default = current
+[user]
+	name = chris
+	email = chris.luu@zuhlke.com
+[coderabbit]
+	machineId = cli/7e884e8931bb4d8c827f3806496e00c8
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
