@@ -136,3 +136,16 @@ EOF
   tar tzf "$archive" | grep -q "zsh/.zshrc"
   tar tzf "$archive" | grep -q "vault/global/ssh/keys/id_ed25519"
 }
+
+@test "CLM_PACK_DIR defaults from CLM_SETTINGS_DIR when not explicitly set" {
+  run bash -c "
+    unset CLM_PACK_DIR CLM_SETTINGS_DIR
+    export CLM_ROOT='/tmp/fake-clm-root'
+    export CLM_MACHINE_NAME='test-machine'
+    source '$CLM_ROOT/lib/clm/common.sh'
+    source '$CLM_ROOT/lib/clm/pack.sh'
+    echo \"\$CLM_PACK_DIR\"
+  "
+  [ "$status" -eq 0 ]
+  [ "$output" = "/tmp/fake-clm-root/cl-settings/test-machine/pack" ]
+}

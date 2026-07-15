@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CLM_PACK_DIR="${CLM_PACK_DIR:-$CLM_ROOT/pack}"
+CLM_PACK_DIR="${CLM_PACK_DIR:-$CLM_SETTINGS_DIR/pack}"
 CLM_BACKUP_DIR="${CLM_BACKUP_DIR:-$HOME/clm-backups}"
 
 clm::pack_checkers() {
