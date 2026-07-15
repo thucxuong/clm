@@ -3,7 +3,7 @@
 CLM_TARGET="${CLM_TARGET:-$HOME}"
 
 clm::machine_name() {
-  echo "${CLM_MACHINE_NAME:-$(scutil --get ComputerName)}"
+  echo "${CLM_MACHINE_NAME:-$(scutil --get ComputerName 2>/dev/null || true)}"
 }
 
 CLM_MACHINE_NAME="$(clm::machine_name)"

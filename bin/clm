@@ -19,7 +19,13 @@ CLM_ROOT="${CLM_ROOT:-$(resolve_root)}"
 export CLM_ROOT
 CLM_TARGET="${CLM_TARGET:-$HOME}"
 export CLM_TARGET
-CLM_VAULT="${CLM_VAULT:-$CLM_ROOT/vault}"
+CLM_MACHINE_NAME="${CLM_MACHINE_NAME:-$(scutil --get ComputerName 2>/dev/null || true)}"
+export CLM_MACHINE_NAME
+CLM_SETTINGS_DIR="${CLM_SETTINGS_DIR:-$CLM_ROOT/cl-settings/$CLM_MACHINE_NAME}"
+export CLM_SETTINGS_DIR
+CLM_DOTFILES_DIR="${CLM_DOTFILES_DIR:-$CLM_SETTINGS_DIR/dotfiles}"
+export CLM_DOTFILES_DIR
+CLM_VAULT="${CLM_VAULT:-$CLM_SETTINGS_DIR/vault}"
 export CLM_VAULT
 
 # shellcheck source=lib/clm/common.sh

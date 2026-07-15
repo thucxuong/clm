@@ -42,6 +42,17 @@ setup() {
   [ "$output" = "test-machine" ]
 }
 
+@test "sourcing common.sh does not crash when scutil is unreachable on PATH" {
+  run bash -c "
+    unset CLM_MACHINE_NAME
+    export PATH='/usr/bin:/bin'
+    source '$CLM_ROOT/lib/clm/common.sh'
+    echo ok
+  "
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"ok"* ]]
+}
+
 @test "CLM_SETTINGS_DIR, CLM_DOTFILES_DIR, and CLM_VAULT default from CLM_ROOT and machine name" {
   run bash -c "
     unset CLM_VAULT CLM_DOTFILES_DIR CLM_SETTINGS_DIR
