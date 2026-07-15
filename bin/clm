@@ -38,6 +38,8 @@ source "$CLM_ROOT/lib/clm/vault.sh"
 source "$CLM_ROOT/lib/clm/status.sh"
 # shellcheck source=lib/clm/pack.sh
 source "$CLM_ROOT/lib/clm/pack.sh"
+# shellcheck source=lib/clm/unpack.sh
+source "$CLM_ROOT/lib/clm/unpack.sh"
 
 usage() {
   cat <<'EOF'
@@ -48,6 +50,7 @@ Nouns:
   vault   fix-perms
   status
   pack    list | all | brew | mas | vscode | cursor | npm | pnpm
+  unpack
 EOF
 }
 
@@ -103,6 +106,7 @@ main() {
         *) usage; exit 1 ;;
       esac
       ;;
+    unpack) cmd_unpack ;;
     *) usage; exit 1 ;;
   esac
 }
