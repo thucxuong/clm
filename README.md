@@ -52,7 +52,7 @@ after `clm unpack` has run.
     clm pack list              # show which pack checkers are available here
     clm pack all                # capture everything available, then archive the whole ~/clm tree
     clm pack <checker>          # capture one source, e.g. `clm pack brew`
-    clm unpack                   # stow onboard + vault fix-perms + brew bundle, from cl-settings
+    clm unpack                   # stow onboard + vault fix-perms + brew bundle + npm/pnpm globals + vscode/cursor extensions, from cl-settings
 
 Every subcommand accepts `--yes` to skip confirmation prompts.
 
@@ -93,9 +93,9 @@ installation, or your actual settings.
 
 ## What's not here yet
 
-- `clm unpack` only restores dotfiles, vault, and brew (CLI tools + apps).
-  Restoring VS Code/Cursor extensions or npm/pnpm globals from their pack
-  files is still manual.
+- Restoring App Store apps (`mas`) from their pack file — brew's own mas
+  integration in the Brewfile already covers most cases, so this is low
+  priority.
 - Vaulting tool-managed auth (`gh`, `vercel`, `npm login`, Docker registry).
 - Per-project "active project" switching for single-file configs (`.npmrc`,
   `.env`, docker-compose) — the planned project hub, a future `clm project`
