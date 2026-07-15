@@ -33,6 +33,15 @@ ensure_stow() {
   brew install stow
 }
 
+ensure_gh() {
+  if command -v gh >/dev/null 2>&1; then
+    echo "gh: found"
+    return
+  fi
+  echo "gh not found, installing via Homebrew..."
+  brew install gh
+}
+
 link_clm_cli() {
   chmod +x "$CLM_ROOT/bin/clm"
   local prefix
@@ -45,15 +54,16 @@ link_clm_cli() {
 main() {
   ensure_homebrew
   ensure_stow
+  ensure_gh
   link_clm_cli
   cat <<EOF
 
 Done. 'clm' is now on your PATH.
 
 Next steps:
-  clm stow onboard
-  git clone <vault-repo-url> $CLM_VAULT
-  clm vault fix-perms
+  gh auth login
+  gh repo clone <you>/cl-settings $CLM_SETTINGS_DIR
+  clm unpack
 EOF
 }
 

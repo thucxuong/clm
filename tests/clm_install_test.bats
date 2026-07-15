@@ -60,3 +60,11 @@ EOF
   run env PATH="/usr/bin:/bin" CLM_INSTALL_BREW_INSTALL_CMD="touch '$marker'" "$CLM_ROOT/clm-install.sh" <<< "y"
   [ -e "$marker" ]
 }
+
+@test "install runs brew install gh when gh is missing" {
+  write_fake_brew
+  write_fake_stow
+  run env PATH="$FAKE_BIN:/usr/bin:/bin" "$CLM_ROOT/clm-install.sh"
+  [ "$status" -eq 0 ]
+  grep -q "installed: gh" "$BREW_PREFIX/installed.log"
+}
