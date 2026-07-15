@@ -151,3 +151,73 @@ EOF
   grep -q "pnpm add -g aws-cdk$" "$BATS_TEST_TMPDIR/pnpm-calls.log"
   ! grep -q "Legend" "$BATS_TEST_TMPDIR/pnpm-calls.log"
 }
+
+@test "clm unpack restores vscode extensions one per line" {
+  mkdir -p "$CLM_DOTFILES_DIR/zsh" "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
+  echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"
+  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
+  chmod +x "$CLM_VAULT/bin/fix-perms.sh"
+  settings_dir="$CLM_ROOT/settings"
+  mkdir -p "$settings_dir/pack"
+  printf 'alefragnani.bookmarks\nangular.ng-template\n' > "$settings_dir/pack/vscode-extensions.txt"
+  FAKE_BIN="$BATS_TEST_TMPDIR/fakebin"
+  mkdir -p "$FAKE_BIN"
+  ln -s "$(command -v stow)" "$FAKE_BIN/stow"
+  cat > "$FAKE_BIN/code" <<EOF
+#!/usr/bin/env bash
+if [ "\$1" = "--install-extension" ]; then
+  echo "code --install-extension \$2" >> "$BATS_TEST_TMPDIR/code-calls.log"
+  exit 0
+fi
+exit 1
+EOF
+  chmod +x "$FAKE_BIN/code"
+
+  run env CLM_ROOT="$CLM_ROOT" CLM_TARGET="$CLM_TARGET" CLM_DOTFILES_DIR="$CLM_DOTFILES_DIR" CLM_VAULT="$CLM_VAULT" CLM_SETTINGS_DIR="$settings_dir" PATH="$FAKE_BIN:/usr/bin:/bin" "$CLM_ROOT/bin/clm" unpack
+  [ "$status" -eq 0 ]
+  grep -q "code --install-extension alefragnani.bookmarks" "$BATS_TEST_TMPDIR/code-calls.log"
+  grep -q "code --install-extension angular.ng-template" "$BATS_TEST_TMPDIR/code-calls.log"
+}
+
+@test "clm unpack skips vscode restore gracefully when code is not installed" {
+  mkdir -p "$CLM_DOTFILES_DIR/zsh" "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
+  echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"
+  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
+  chmod +x "$CLM_VAULT/bin/fix-perms.sh"
+  settings_dir="$CLM_ROOT/settings"
+  mkdir -p "$settings_dir/pack"
+  echo "alefragnani.bookmarks" > "$settings_dir/pack/vscode-extensions.txt"
+  FAKE_BIN="$BATS_TEST_TMPDIR/fakebin"
+  mkdir -p "$FAKE_BIN"
+  ln -s "$(command -v stow)" "$FAKE_BIN/stow"
+
+  run env CLM_ROOT="$CLM_ROOT" CLM_TARGET="$CLM_TARGET" CLM_DOTFILES_DIR="$CLM_DOTFILES_DIR" CLM_VAULT="$CLM_VAULT" CLM_SETTINGS_DIR="$settings_dir" PATH="$FAKE_BIN:/usr/bin:/bin" "$CLM_ROOT/bin/clm" unpack
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"code not installed"* ]]
+}
+
+@test "clm unpack restores cursor extensions one per line" {
+  mkdir -p "$CLM_DOTFILES_DIR/zsh" "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
+  echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"
+  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
+  chmod +x "$CLM_VAULT/bin/fix-perms.sh"
+  settings_dir="$CLM_ROOT/settings"
+  mkdir -p "$settings_dir/pack"
+  printf 'alefragnani.bookmarks\n' > "$settings_dir/pack/cursor-extensions.txt"
+  FAKE_BIN="$BATS_TEST_TMPDIR/fakebin"
+  mkdir -p "$FAKE_BIN"
+  ln -s "$(command -v stow)" "$FAKE_BIN/stow"
+  cat > "$FAKE_BIN/cursor" <<EOF
+#!/usr/bin/env bash
+if [ "\$1" = "--install-extension" ]; then
+  echo "cursor --install-extension \$2" >> "$BATS_TEST_TMPDIR/cursor-calls.log"
+  exit 0
+fi
+exit 1
+EOF
+  chmod +x "$FAKE_BIN/cursor"
+
+  run env CLM_ROOT="$CLM_ROOT" CLM_TARGET="$CLM_TARGET" CLM_DOTFILES_DIR="$CLM_DOTFILES_DIR" CLM_VAULT="$CLM_VAULT" CLM_SETTINGS_DIR="$settings_dir" PATH="$FAKE_BIN:/usr/bin:/bin" "$CLM_ROOT/bin/clm" unpack
+  [ "$status" -eq 0 ]
+  grep -q "cursor --install-extension alefragnani.bookmarks" "$BATS_TEST_TMPDIR/cursor-calls.log"
+}

@@ -37,6 +37,30 @@ clm::unpack_pnpm() {
   done < "$file"
 }
 
+clm::unpack_vscode() {
+  local file="$CLM_SETTINGS_DIR/pack/vscode-extensions.txt"
+  [ -f "$file" ] || { echo "no vscode-extensions.txt found — skipping VS Code extensions"; return 0; }
+  command -v code >/dev/null 2>&1 || { echo "code not installed — skipping VS Code extensions"; return 0; }
+  local ext
+  while IFS= read -r ext; do
+    [ -n "$ext" ] || continue
+    code --install-extension "$ext" || clm::die "code --install-extension $ext failed"
+  done < "$file"
+  echo "vscode: extensions restored"
+}
+
+clm::unpack_cursor() {
+  local file="$CLM_SETTINGS_DIR/pack/cursor-extensions.txt"
+  [ -f "$file" ] || { echo "no cursor-extensions.txt found — skipping Cursor extensions"; return 0; }
+  command -v cursor >/dev/null 2>&1 || { echo "cursor not installed — skipping Cursor extensions"; return 0; }
+  local ext
+  while IFS= read -r ext; do
+    [ -n "$ext" ] || continue
+    cursor --install-extension "$ext" || clm::die "cursor --install-extension $ext failed"
+  done < "$file"
+  echo "cursor: extensions restored"
+}
+
 cmd_unpack() {
   [ -d "$CLM_SETTINGS_DIR" ] || clm::die "cl-settings not found at $CLM_SETTINGS_DIR (clone it first: gh repo clone <you>/cl-settings $CLM_SETTINGS_DIR)"
   cmd_stow_onboard
@@ -49,4 +73,6 @@ cmd_unpack() {
   fi
   clm::unpack_npm
   clm::unpack_pnpm
+  clm::unpack_vscode
+  clm::unpack_cursor
 }
