@@ -7,15 +7,26 @@ from your actual settings, which live in a separate repo, `cl-settings`.
 ## First-time setup on a new machine
 
     git clone <clm-engine-repo-url> ~/clm
-    cd ~/clm && ./clm-install.sh
-    gh auth login
-    gh repo clone <you>/cl-settings ~/clm/cl-settings
-    clm unpack
+    cd ~/clm && ./clm-install.sh <you>/cl-settings
 
-Note that this deliberately avoids SSH for the first clone — `gh auth login`
-is browser-based OAuth, so no SSH key is needed just to get `cl-settings`
-(which is where your SSH keys actually live). SSH only becomes usable after
-`clm unpack` has run.
+That's the whole flow: Homebrew, Stow, and `gh` get installed if missing,
+`gh auth login` runs if you're not already authenticated (browser-based —
+no SSH key needed), `cl-settings` gets cloned if it isn't already present,
+and `clm unpack` runs at the end (stow onboard + vault fix-perms + brew
+bundle). Every step checks its own precondition first, so if this gets
+interrupted partway (network blip, closed terminal mid-`gh auth login`),
+just run the same command again — nothing gets redone unnecessarily, and
+it picks up wherever it left off.
+
+If you don't have the repo slug handy yet, `./clm-install.sh` (no argument)
+still installs Homebrew/Stow/gh and authenticates `gh`; it stops with a
+clear message at the `cl-settings not found` step, telling you exactly
+what to run once you do have it.
+
+This deliberately avoids SSH for the first clone — `gh auth login` is
+browser-based OAuth, so no SSH key is needed just to get `cl-settings`
+(which is where your SSH keys actually live). SSH only becomes usable
+after `clm unpack` has run.
 
 ## Layout
 
