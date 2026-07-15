@@ -6,17 +6,23 @@ from your actual settings, which live in a separate repo, `cl-settings`.
 
 ## First-time setup on a new machine
 
-    git clone <clm-engine-repo-url> ~/clm
-    cd ~/clm && ./clm-install.sh <you>/cl-settings
+    curl -fsSL https://raw.githubusercontent.com/thucxuong/clm/main/bootstrap.sh | sh -s -- thucxuong/cl-settings
 
-That's the whole flow: Homebrew, Stow, and `gh` get installed if missing,
+That's it — one command. It clones `~/clm`, then hands off to
+`clm-install.sh`: Homebrew, Stow, and `gh` get installed if missing,
 `gh auth login` runs if you're not already authenticated (browser-based —
 no SSH key needed), `cl-settings` gets cloned if it isn't already present,
 and `clm unpack` runs at the end (stow onboard + vault fix-perms + brew
-bundle). Every step checks its own precondition first, so if this gets
-interrupted partway (network blip, closed terminal mid-`gh auth login`),
-just run the same command again — nothing gets redone unnecessarily, and
-it picks up wherever it left off.
+bundle + npm/pnpm globals + VS Code/Cursor extensions). Every step checks
+its own precondition first, so if this gets interrupted partway (network
+blip, closed terminal mid-`gh auth login`), just run the same command
+again — nothing gets redone unnecessarily, and it picks up wherever it
+left off.
+
+Prefer to inspect before piping to `sh`? The equivalent two-step version:
+
+    git clone https://github.com/thucxuong/clm.git ~/clm
+    cd ~/clm && ./clm-install.sh thucxuong/cl-settings
 
 If you don't have the repo slug handy yet, `./clm-install.sh` (no argument)
 still installs Homebrew/Stow/gh and authenticates `gh`; it stops with a
