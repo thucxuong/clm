@@ -42,11 +42,12 @@ write_real_stow() {
   ln -sf "$(command -v stow)" "$FAKE_BIN/stow"
 }
 
-@test "install links clm into the brew prefix when brew and stow are present" {
+@test "install makes bin/clm executable without touching the brew prefix" {
   write_fake_brew
   write_fake_stow
   run env PATH="$FAKE_BIN:/usr/bin:/bin" "$CLM_ROOT/clm-install.sh"
-  [ -L "$BREW_PREFIX/bin/clm" ]
+  [ -x "$CLM_ROOT/bin/clm" ]
+  [ ! -e "$BREW_PREFIX/bin/clm" ]
 }
 
 @test "install runs brew install stow when stow is missing" {

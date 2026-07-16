@@ -70,24 +70,20 @@ ensure_cl_settings() {
   gh repo clone "$repo_slug" "$cl_settings_root"
 }
 
-link_clm_cli() {
-  chmod +x "$CLM_ROOT/bin/clm"
-  local prefix
-  prefix="$(brew --prefix)"
-  mkdir -p "$prefix/bin"
-  ln -sf "$CLM_ROOT/bin/clm" "$prefix/bin/clm"
-  echo "linked: $prefix/bin/clm -> $CLM_ROOT/bin/clm"
-}
-
 main() {
   local settings_repo="${1:-}"
   ensure_homebrew
   ensure_stow
   ensure_gh
-  link_clm_cli
+  chmod +x "$CLM_ROOT/bin/clm"
   ensure_gh_auth
   ensure_cl_settings "$settings_repo"
   "$CLM_ROOT/bin/clm" unpack
+  cat <<EOF
+
+Done. Open a new terminal (or run: exec \$SHELL) so 'clm' is on your PATH.
+It's added via ~/.zshrc, picked up by new shells — not this one.
+EOF
 }
 
 main "$@"

@@ -19,6 +19,11 @@ blip, closed terminal mid-`gh auth login`), just run the same command
 again — nothing gets redone unnecessarily, and it picks up wherever it
 left off.
 
+`clm` itself goes on `PATH` via a line in your own `zsh/.zshrc` (part of
+`cl-settings`, stowed during `clm unpack`) — not via Homebrew, so it isn't
+tied to wherever Homebrew happens to live. Open a new terminal after the
+first run for that to take effect.
+
 Prefer to inspect before piping to `sh`? The equivalent two-step version:
 
     git clone https://github.com/thucxuong/clm.git ~/clm
