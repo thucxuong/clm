@@ -39,6 +39,21 @@ browser-based OAuth, so no SSH key is needed just to get `cl-settings`
 (which is where your SSH keys actually live). SSH only becomes usable
 after `clm unpack` has run.
 
+### Setting up an additional (not-yet-seen) machine
+
+`cl-settings` is namespaced per machine (`cl-settings/<machine-name>/`).
+If this is a genuinely new machine — not a reinstall of one already in
+`cl-settings` — `clm unpack` will correctly say `cl-settings not found`
+for *this* machine's subfolder, even though `cl-settings` itself cloned
+fine. Scaffold it first:
+
+    clm settings new --from <existing-machine-name>
+    clm unpack
+
+`--from` copies that machine's dotfiles as an editable starting point.
+`vault/` and `pack/` always start empty — add real SSH keys yourself
+under `cl-settings/<this-machine>/vault/`, then run `clm vault fix-perms`.
+
 ## Layout
 
 - `bin/clm` — the CLI. `lib/clm/*.sh` holds one module per noun.
@@ -64,6 +79,7 @@ after `clm unpack` has run.
     clm pack all                # capture everything available, then archive the whole ~/clm tree
     clm pack <checker>          # capture one source, e.g. `clm pack brew`
     clm unpack                   # stow onboard + vault fix-perms + brew bundle + npm/pnpm globals + vscode/cursor extensions, from cl-settings
+    clm settings new [name] [--from <machine>]  # scaffold a new machine's cl-settings folder
 
 Every subcommand accepts `--yes` to skip confirmation prompts.
 
