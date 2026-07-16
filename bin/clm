@@ -40,17 +40,20 @@ source "$CLM_ROOT/lib/clm/status.sh"
 source "$CLM_ROOT/lib/clm/pack.sh"
 # shellcheck source=lib/clm/unpack.sh
 source "$CLM_ROOT/lib/clm/unpack.sh"
+# shellcheck source=lib/clm/settings.sh
+source "$CLM_ROOT/lib/clm/settings.sh"
 
 usage() {
   cat <<'EOF'
 Usage: clm <noun> <verb> [args] [--yes]
 
 Nouns:
-  stow    onboard | add <pkg> | remove <pkg> | list
-  vault   fix-perms
+  stow      onboard | add <pkg> | remove <pkg> | list
+  vault     fix-perms
   status
-  pack    list | all | brew | mas | vscode | cursor | npm | pnpm
+  pack      list | all | brew | mas | vscode | cursor | npm | pnpm
   unpack
+  settings  new [machine-name] [--from <source-machine>]
 EOF
 }
 
@@ -107,6 +110,24 @@ main() {
       esac
       ;;
     unpack) cmd_unpack ;;
+    settings)
+      verb="${1:-}"
+      [ "$#" -gt 0 ] && shift
+      case "$verb" in
+        new)
+          target_name=""
+          from_machine=""
+          while [ "$#" -gt 0 ]; do
+            case "$1" in
+              --from) from_machine="${2:-}"; shift 2 ;;
+              *) target_name="$1"; shift ;;
+            esac
+          done
+          cmd_settings_new "$target_name" "$from_machine"
+          ;;
+        *) usage; exit 1 ;;
+      esac
+      ;;
     *) usage; exit 1 ;;
   esac
 }
