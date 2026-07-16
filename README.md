@@ -55,8 +55,10 @@ before that failure though, so **open a new terminal first**, then:
 
 (Re-running `clm-install.sh` is resumable — it skips everything already
 done and picks up at `clm unpack`, which now succeeds.) `--from` copies
-that machine's dotfiles as an editable starting point. `vault/` always
-starts empty — add real SSH keys yourself under
+that machine's dotfiles and `pack/` (Brewfile, extension lists — no
+secrets in either) as an editable starting point, so `clm unpack`'s brew
+bundle/npm/pnpm/extension restore actually has something to install.
+`vault/` always starts empty — add real SSH keys yourself under
 `cl-settings/<this-machine>/vault/`, then run `clm vault fix-perms`.
 
 ## Layout

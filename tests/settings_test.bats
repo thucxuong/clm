@@ -50,6 +50,19 @@ EOF
   [ ! -e "$CLM_ROOT/cl-settings/new-machine/vault/global/ssh/keys/id_rsa" ]
 }
 
+@test "clm settings new copies pack from --from too, not just dotfiles" {
+  mkdir -p "$CLM_ROOT/cl-settings/old-machine/dotfiles/zsh" "$CLM_ROOT/cl-settings/old-machine/pack"
+  echo 'export FOO=1' > "$CLM_ROOT/cl-settings/old-machine/dotfiles/zsh/.zshrc"
+  echo 'brew "git-lfs"' > "$CLM_ROOT/cl-settings/old-machine/pack/Brewfile"
+  echo 'some.extension' > "$CLM_ROOT/cl-settings/old-machine/pack/vscode-extensions.txt"
+
+  run env CLM_ROOT="$CLM_ROOT" CLM_MACHINE_NAME="new-machine" "$CLM_ROOT/bin/clm" settings new new-machine --from old-machine
+  [ "$status" -eq 0 ]
+  [ -f "$CLM_ROOT/cl-settings/new-machine/pack/Brewfile" ]
+  grep -q 'git-lfs' "$CLM_ROOT/cl-settings/new-machine/pack/Brewfile"
+  [ -f "$CLM_ROOT/cl-settings/new-machine/pack/vscode-extensions.txt" ]
+}
+
 @test "clm settings new refuses when --from source machine doesn't exist" {
   mkdir -p "$CLM_ROOT/cl-settings"
   run env CLM_ROOT="$CLM_ROOT" CLM_MACHINE_NAME="new-machine" "$CLM_ROOT/bin/clm" settings new new-machine --from nonexistent-machine

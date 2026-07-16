@@ -29,6 +29,14 @@ cmd_settings_new() {
       sed -i '' "s#cl-settings/$from_machine/#cl-settings/$machine_name/#g" "$target/dotfiles/ssh/.ssh/config"
     fi
     echo "settings: copied dotfiles from $from_machine"
+
+    if [ -d "$source/pack" ]; then
+      for entry in "$source/pack"/*; do
+        [ -e "$entry" ] || continue
+        cp -R "$entry" "$target/pack/"
+      done
+      echo "settings: copied pack from $from_machine"
+    fi
   fi
 
   cp "$CLM_TEMPLATES_DIR/fix-perms.sh" "$target/vault/bin/fix-perms.sh"

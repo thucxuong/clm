@@ -401,3 +401,15 @@ directly with zero conflict risk against the later real `.zshrc` stow:
 - The earlier plan to add this line to `cl-settings/zsh/.zshrc` is
   retracted — it's now redundant (harmless if present, but no longer
   needed) since `.zshenv` alone guarantees it unconditionally.
+
+## Addendum (2026-07-16): `clm settings new --from` also copies `pack/`
+
+Without this, a new machine scaffolded via `--from` has an empty `pack/`,
+so `clm unpack`'s brew bundle/npm/pnpm/extension restore steps all report
+"not found" and skip — defeating the point of restoring software onto a
+new machine at all. Unlike `vault`, `pack/` content (Brewfile, extension
+lists, npm/pnpm global lists) has no secrets in it — it's just a software
+shopping list — so there's no reason not to copy it the same way as
+`dotfiles/`. No path-rewriting is needed for `pack/` files (unlike
+`dotfiles/ssh/.ssh/config`) since none of them contain machine-name-scoped
+paths.
