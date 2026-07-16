@@ -53,6 +53,65 @@ EOF
   [[ "$output" == *"brew bundle complete"* ]]
 }
 
+@test "clm unpack retries brew bundle on failure and succeeds on a later attempt" {
+  mkdir -p "$CLM_DOTFILES_DIR/zsh"
+  echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"
+  mkdir -p "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
+  cp "$BATS_TEST_DIRNAME/../lib/clm/templates/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
+  chmod +x "$CLM_VAULT/bin/fix-perms.sh"
+  settings_dir="$CLM_ROOT/settings"
+  mkdir -p "$settings_dir/pack"
+  echo '# empty brewfile' > "$settings_dir/pack/Brewfile"
+  FAKE_BIN="$BATS_TEST_TMPDIR/fakebin"
+  mkdir -p "$FAKE_BIN"
+  attempts_log="$BATS_TEST_TMPDIR/brew-attempts.log"
+  cat > "$FAKE_BIN/brew" <<EOF
+#!/usr/bin/env bash
+if [ "\$1" = "bundle" ]; then
+  echo x >> "$attempts_log"
+  attempts="\$(wc -l < "$attempts_log")"
+  if [ "\$attempts" -lt 2 ]; then
+    exit 1
+  fi
+  exit 0
+fi
+exit 1
+EOF
+  chmod +x "$FAKE_BIN/brew"
+  ln -s "$(command -v stow)" "$FAKE_BIN/stow"
+
+  run env CLM_ROOT="$CLM_ROOT" CLM_TARGET="$CLM_TARGET" CLM_DOTFILES_DIR="$CLM_DOTFILES_DIR" CLM_VAULT="$CLM_VAULT" CLM_SETTINGS_DIR="$settings_dir" CLM_BREW_BUNDLE_RETRY_DELAY=0 PATH="$FAKE_BIN:/usr/bin:/bin" "$CLM_ROOT/bin/clm" unpack
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"brew bundle complete"* ]]
+  [ "$(wc -l < "$attempts_log")" -eq 2 ]
+}
+
+@test "clm unpack gives a proxy hint after exhausting brew bundle retries" {
+  mkdir -p "$CLM_DOTFILES_DIR/zsh"
+  echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"
+  mkdir -p "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
+  cp "$BATS_TEST_DIRNAME/../lib/clm/templates/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
+  chmod +x "$CLM_VAULT/bin/fix-perms.sh"
+  settings_dir="$CLM_ROOT/settings"
+  mkdir -p "$settings_dir/pack"
+  echo '# empty brewfile' > "$settings_dir/pack/Brewfile"
+  FAKE_BIN="$BATS_TEST_TMPDIR/fakebin"
+  mkdir -p "$FAKE_BIN"
+  cat > "$FAKE_BIN/brew" <<'EOF'
+#!/usr/bin/env bash
+if [ "$1" = "bundle" ]; then
+  exit 1
+fi
+exit 1
+EOF
+  chmod +x "$FAKE_BIN/brew"
+  ln -s "$(command -v stow)" "$FAKE_BIN/stow"
+
+  run env CLM_ROOT="$CLM_ROOT" CLM_TARGET="$CLM_TARGET" CLM_DOTFILES_DIR="$CLM_DOTFILES_DIR" CLM_VAULT="$CLM_VAULT" CLM_SETTINGS_DIR="$settings_dir" CLM_BREW_BUNDLE_RETRIES=2 CLM_BREW_BUNDLE_RETRY_DELAY=0 PATH="$FAKE_BIN:/usr/bin:/bin" "$CLM_ROOT/bin/clm" unpack
+  [ "$status" -ne 0 ]
+  [[ "$output" == *"HTTPS_PROXY"* ]]
+}
+
 @test "clm unpack installs casks into ~/Applications, not /Applications" {
   mkdir -p "$CLM_DOTFILES_DIR/zsh" "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
   echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"

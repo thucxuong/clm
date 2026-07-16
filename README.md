@@ -110,6 +110,13 @@ Every subcommand accepts `--yes` to skip confirmation prompts.
 - `clm unpack`'s `brew bundle` step installs casks (GUI apps) into
   `~/Applications` rather than the shared `/Applications`, so it never
   needs admin-group write access.
+- `clm unpack`'s `brew bundle` step retries up to `CLM_BREW_BUNDLE_RETRIES`
+  (default 3) times on failure, since a batch of unrelated fetch failures
+  is usually a transient network blip rather than anything wrong with the
+  packages themselves. If it still fails after retrying, the error
+  mentions `HTTPS_PROXY`/`HTTP_PROXY` in case a corporate network/VPN
+  needs one configured — something no script can safely detect or set on
+  its own.
 
 ## Backups
 
