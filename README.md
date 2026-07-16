@@ -90,10 +90,14 @@ Every subcommand accepts `--yes` to skip confirmation prompts.
 
 ## Safety
 
-- Stow conflicts (an existing non-symlink file at a target path) are refused
-  natively by GNU Stow — nothing here overrides that. `--no-folding` is always
-  passed so a not-yet-existing target directory (like `~/.ssh`) gets its
-  individual files symlinked rather than becoming one directory-level symlink.
+- Stow conflicts (an existing non-symlink file at a target path) are
+  detected via a dry-run before every real `stow` call. The conflicting
+  file is renamed to `<name>.clm-backup` (never clobbering an earlier
+  backup — `.clm-backup.1`, `.clm-backup.2`, ... if needed) and the real
+  stow retries — nothing is ever deleted, and nothing is silently
+  overwritten either. `--no-folding` is always passed so a not-yet-existing
+  target directory (like `~/.ssh`) gets its individual files symlinked
+  rather than becoming one directory-level symlink.
 - `clm stow remove` and the Homebrew install step in `clm-install.sh` prompt
   for confirmation unless `--yes`/`CLM_YES=1` is set.
 - All permission fixes (`clm vault fix-perms`) touch only the specific,
