@@ -315,3 +315,56 @@ globals → VS Code extensions → Cursor extensions. Software install
 (`brew bundle`) runs before the tool-specific restores, since `code`/
 `cursor`/`npm`/`pnpm` may themselves come from Homebrew casks/formulae in
 that same Brewfile and need to exist first.
+
+## Addendum (2026-07-16): `clm settings new` — scaffolding a genuinely new machine
+
+Per-machine namespacing (`cl-settings/<machine>/...`) assumed the common
+case is reinstalling/replacing an *existing* machine (same computer name,
+same folder already present). Real usage surfaced the other case: a
+genuinely new, additional machine, whose computer name has no matching
+folder yet — `clm unpack` correctly reports "cl-settings not found"
+(pointing at the per-machine subfolder) even though `cl-settings` itself
+cloned fine.
+
+For that case, a machine's folder for `cl-settings/<machine>/vault` and
+`cl-settings/<machine>/pack` must start empty regardless (a new machine
+has no existing keys or installed-software snapshot to inherit — vault
+content in particular must never be silently duplicated across machines
+without an explicit decision to do so). `dotfiles/` is different: shell/git
+config is generally similar across machines, so copying it from an
+existing machine as an editable starting point is useful. `clm settings
+new` supports both.
+
+### Command
+
+```
+clm settings new [machine-name] [--from <source-machine>]
+```
+
+- `machine-name` defaults to `$CLM_MACHINE_NAME` (this machine, the common
+  case: "scaffold settings for the machine I'm standing on right now").
+- `--from <source-machine>` is optional. When given, `dotfiles/` is copied
+  from that machine's folder; `vault/` and `pack/` are never copied from
+  anywhere, always freshly scaffolded empty.
+- Refuses (via `clm::die`) if: `cl-settings` itself isn't cloned yet, the
+  target machine folder already exists (never silently overwrites), or
+  `--from <source-machine>` doesn't exist.
+
+### The ssh dotfiles package's machine-name dependency
+
+`dotfiles/ssh/.ssh/config`'s `Include` lines hardcode the machine name in
+their path (`~/clm/cl-settings/<machine>/vault/...`, per the original
+per-machine design). When `--from` copies this file, that path is
+rewritten from the source machine's name to the target's via a scoped
+`sed` substitution — copying it unmodified would point the new machine's
+SSH config at the *old* machine's vault path.
+
+### Vault/pack scaffolding
+
+Mirrors the original vault bootstrap (skeleton `README.md`, a commented
+`global/ssh/config` template, empty `global/ssh/keys/`, `projects/`, and
+`bin/fix-perms.sh`) and an empty `pack/` directory. `fix-perms.sh`'s
+canonical source moves from `tests/fixtures/fix-perms.sh` (test-only) to
+`lib/clm/templates/fix-perms.sh` (a real runtime resource, now used by both
+`clm settings new` and the test suite) — tests are updated to reference the
+new canonical path instead of keeping a second, potentially-drifting copy.
