@@ -413,3 +413,25 @@ shopping list — so there's no reason not to copy it the same way as
 `dotfiles/`. No path-rewriting is needed for `pack/` files (unlike
 `dotfiles/ssh/.ssh/config`) since none of them contain machine-name-scoped
 paths.
+
+## Addendum (2026-07-16): retry `brew bundle` before giving up
+
+Real usage on a new machine hit a `brew bundle` run where a large, mixed
+batch of unrelated formulae and casks all failed to fetch simultaneously —
+the pattern of a transient network issue (or a corporate proxy/VPN
+requirement Homebrew wasn't told about), not anything specific to those
+packages. A script cannot safely auto-detect or configure a proxy (it has
+no way to know the correct URL/credentials — only the user or their IT
+department does), but it can smooth over transient failures automatically
+and give a clearer hint when they aren't transient:
+
+- `cmd_unpack`'s `brew bundle` step now retries up to
+  `${CLM_BREW_BUNDLE_RETRIES:-3}` times, waiting
+  `${CLM_BREW_BUNDLE_RETRY_DELAY:-3}` seconds between attempts (both
+  overridable for tests, which set the delay to `0`). This is safe because
+  `brew bundle` is idempotent — a retry only re-attempts whatever didn't
+  already succeed.
+- If every attempt fails, the final `clm::die` message explicitly
+  mentions that Homebrew respects `HTTPS_PROXY`/`HTTP_PROXY` and suggests
+  setting them and re-running `clm unpack` (which is itself resumable) if
+  the machine is behind a corporate proxy/VPN.
