@@ -80,6 +80,9 @@ Every subcommand accepts `--yes` to skip confirmation prompts.
   `cl-settings/<machine>/vault`.
 - `clm unpack` refuses (rather than guessing) when `cl-settings` hasn't been
   cloned yet.
+- `clm unpack`'s `brew bundle` step installs casks (GUI apps) into
+  `~/Applications` rather than the shared `/Applications`, so it never
+  needs admin-group write access.
 
 ## Backups
 

@@ -53,6 +53,32 @@ EOF
   [[ "$output" == *"brew bundle complete"* ]]
 }
 
+@test "clm unpack installs casks into ~/Applications, not /Applications" {
+  mkdir -p "$CLM_DOTFILES_DIR/zsh" "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
+  echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"
+  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
+  chmod +x "$CLM_VAULT/bin/fix-perms.sh"
+  settings_dir="$CLM_ROOT/settings"
+  mkdir -p "$settings_dir/pack"
+  echo '# empty brewfile' > "$settings_dir/pack/Brewfile"
+  FAKE_BIN="$BATS_TEST_TMPDIR/fakebin"
+  mkdir -p "$FAKE_BIN"
+  ln -s "$(command -v stow)" "$FAKE_BIN/stow"
+  cat > "$FAKE_BIN/brew" <<EOF
+#!/usr/bin/env bash
+if [ "\$1" = "bundle" ]; then
+  echo "HOMEBREW_CASK_OPTS=\$HOMEBREW_CASK_OPTS" >> "$BATS_TEST_TMPDIR/brew-bundle-env.log"
+  exit 0
+fi
+exit 1
+EOF
+  chmod +x "$FAKE_BIN/brew"
+
+  run env CLM_ROOT="$CLM_ROOT" CLM_TARGET="$CLM_TARGET" CLM_DOTFILES_DIR="$CLM_DOTFILES_DIR" CLM_VAULT="$CLM_VAULT" CLM_SETTINGS_DIR="$settings_dir" PATH="$FAKE_BIN:/usr/bin:/bin" "$CLM_ROOT/bin/clm" unpack
+  [ "$status" -eq 0 ]
+  grep -q -- "--appdir=$HOME/Applications" "$BATS_TEST_TMPDIR/brew-bundle-env.log"
+}
+
 @test "clm unpack restores npm globals, correctly stripping scoped and unscoped versions" {
   mkdir -p "$CLM_DOTFILES_DIR/zsh" "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
   echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"
