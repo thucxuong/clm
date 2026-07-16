@@ -174,3 +174,28 @@ clm vault fix-perms                # fixes key file/dir permissions
 ```
 
 SSH access works immediately after this; no further manual wiring needed.
+
+## Addendum (2026-07-16): auto-backup on stow conflict
+
+Real usage on a new machine hit exactly the conflict scenario the safety
+layer was designed to catch: a pre-existing (non-tracked) `~/.zshrc`
+already on the machine (a common corporate/default macOS baseline) blocked
+`clm stow add zsh`/`clm unpack` outright with GNU Stow's own refusal
+message. Refusing was correct — silently overwriting an unknown local file
+would be exactly the kind of guess this codebase avoids — but leaving the
+user to manually diagnose Stow's raw error and `mv` the file aside by hand
+is unnecessary friction for what's now a known, recurring situation.
+
+### Fix: detect via dry-run, back up automatically, then stow for real
+
+`clm::stow_backup_conflicts(pkg)` runs `stow -n` (dry-run) first, greps its
+`cannot stow ... over existing target <path> since ...` lines, and for
+each conflicting target that's a real file (not a symlink — never touches
+anything Stow would recognize as already its own), renames it to
+`<path>.clm-backup` (or `.clm-backup.<n>` if a backup from an earlier run
+is already there — never clobbers a prior backup). `cmd_stow_add` and
+`cmd_stow_onboard` call it before the real `stow` invocation, so the
+second, real attempt has nothing left to conflict with and succeeds.
+Nothing is ever deleted — the original content is always still on disk
+under the `.clm-backup` name, and it's on the user to look at it and
+decide whether to fold anything from it into their tracked dotfiles.
