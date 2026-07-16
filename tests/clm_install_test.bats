@@ -204,3 +204,29 @@ EOF
   second_clone_calls="$(wc -l < "$BREW_PREFIX/gh-clone.log")"
   [ "$first_clone_calls" -eq "$second_clone_calls" ]
 }
+
+@test "ensure_clm_on_path adds the PATH line to .zshenv when absent" {
+  write_fake_brew
+  write_fake_stow
+  zshenv="$BATS_TEST_TMPDIR/zshenv"
+  run env PATH="$FAKE_BIN:/usr/bin:/bin" CLM_ZSHENV="$zshenv" "$CLM_ROOT/clm-install.sh"
+  grep -qF 'export PATH="$HOME/clm/bin:$PATH"' "$zshenv"
+}
+
+@test "ensure_clm_on_path is idempotent across two runs" {
+  write_fake_brew
+  write_fake_stow
+  zshenv="$BATS_TEST_TMPDIR/zshenv"
+  env PATH="$FAKE_BIN:/usr/bin:/bin" CLM_ZSHENV="$zshenv" "$CLM_ROOT/clm-install.sh" || true
+  env PATH="$FAKE_BIN:/usr/bin:/bin" CLM_ZSHENV="$zshenv" "$CLM_ROOT/clm-install.sh" || true
+  [ "$(grep -cF 'export PATH="$HOME/clm/bin:$PATH"' "$zshenv")" -eq 1 ]
+}
+
+@test "clm ends up on PATH via .zshenv even when cl-settings is never found" {
+  write_fake_brew
+  write_fake_stow
+  zshenv="$BATS_TEST_TMPDIR/zshenv"
+  run env PATH="$FAKE_BIN:/usr/bin:/bin" CLM_ZSHENV="$zshenv" CLM_MACHINE_NAME="brand-new-machine" "$CLM_ROOT/clm-install.sh"
+  [ "$status" -ne 0 ]
+  grep -qF 'export PATH="$HOME/clm/bin:$PATH"' "$zshenv"
+}

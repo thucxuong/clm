@@ -48,6 +48,17 @@ ensure_gh() {
   brew install gh
 }
 
+ensure_clm_on_path() {
+  local zshenv="${CLM_ZSHENV:-$HOME/.zshenv}"
+  local path_line='export PATH="$HOME/clm/bin:$PATH"'
+  if [ -f "$zshenv" ] && grep -qF "$path_line" "$zshenv"; then
+    echo "clm PATH: already in $zshenv"
+    return
+  fi
+  echo "$path_line" >> "$zshenv"
+  echo "clm PATH: added to $zshenv"
+}
+
 ensure_gh_auth() {
   if gh auth status >/dev/null 2>&1; then
     echo "gh: already authenticated"
@@ -76,13 +87,13 @@ main() {
   ensure_stow
   ensure_gh
   chmod +x "$CLM_ROOT/bin/clm"
+  ensure_clm_on_path
   ensure_gh_auth
   ensure_cl_settings "$settings_repo"
   "$CLM_ROOT/bin/clm" unpack
   cat <<EOF
 
 Done. Open a new terminal (or run: exec \$SHELL) so 'clm' is on your PATH.
-It's added via ~/.zshrc, picked up by new shells — not this one.
 EOF
 }
 
