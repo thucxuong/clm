@@ -34,9 +34,30 @@ clm::validate_package() {
   [ -d "$CLM_DOTFILES_DIR/$pkg" ] || clm::die "no such package: $pkg"
 }
 
+clm::stow_backup_conflicts() {
+  local pkg="$1"
+  local rel target backup n
+  stow --no-folding -n -d "$CLM_DOTFILES_DIR" -t "$CLM_TARGET" "$pkg" 2>&1 | grep "cannot stow" | while IFS= read -r line; do
+    rel="$(echo "$line" | sed -E 's/.*over existing target (.*) since.*/\1/')"
+    [ -n "$rel" ] || continue
+    target="$CLM_TARGET/$rel"
+    [ -e "$target" ] || continue
+    [ -L "$target" ] && continue
+    backup="$target.clm-backup"
+    n=1
+    while [ -e "$backup" ]; do
+      backup="$target.clm-backup.$n"
+      n=$((n + 1))
+    done
+    mv "$target" "$backup"
+    echo "backed up conflicting file: $target -> $backup"
+  done
+}
+
 cmd_stow_add() {
   local pkg="$1"
   clm::validate_package "$pkg"
+  clm::stow_backup_conflicts "$pkg"
   stow --no-folding -d "$CLM_DOTFILES_DIR" -t "$CLM_TARGET" "$pkg" || clm::die "stow failed for '$pkg' (see conflicts above)"
   echo "stowed: $pkg"
 }
@@ -56,6 +77,7 @@ cmd_stow_onboard() {
       echo "skip (not present): $pkg"
       continue
     fi
+    clm::stow_backup_conflicts "$pkg"
     stow --no-folding -d "$CLM_DOTFILES_DIR" -t "$CLM_TARGET" "$pkg" || clm::die "stow failed for '$pkg' (see conflicts above)"
     echo "stowed: $pkg"
   done

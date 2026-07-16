@@ -58,7 +58,7 @@ setup() {
   [ "$status" -ne 0 ]
 }
 
-@test "cmd_stow_add refuses when the target already has a conflicting non-symlink file" {
+@test "cmd_stow_add backs up a conflicting non-symlink file and succeeds" {
   mkdir -p "$CLM_TARGET"
   echo 'not managed by stow' > "$CLM_TARGET/.zshrc"
   run bash -c "
@@ -67,8 +67,27 @@ setup() {
     source '$CLM_ROOT/lib/clm/stow.sh'
     cmd_stow_add zsh
   "
-  [ "$status" -ne 0 ]
-  [ ! -L "$CLM_TARGET/.zshrc" ]
+  [ "$status" -eq 0 ]
+  [ -L "$CLM_TARGET/.zshrc" ]
+  [ -f "$CLM_TARGET/.zshrc.clm-backup" ]
+  [ "$(cat "$CLM_TARGET/.zshrc.clm-backup")" = "not managed by stow" ]
+}
+
+@test "cmd_stow_add does not clobber an existing .clm-backup, uses a numbered suffix instead" {
+  mkdir -p "$CLM_TARGET"
+  echo 'first conflict' > "$CLM_TARGET/.zshrc"
+  echo 'earlier backup, keep me' > "$CLM_TARGET/.zshrc.clm-backup"
+  run bash -c "
+    export CLM_ROOT='$CLM_ROOT' CLM_TARGET='$CLM_TARGET' CLM_DOTFILES_DIR='$CLM_DOTFILES_DIR'
+    source '$CLM_ROOT/lib/clm/common.sh'
+    source '$CLM_ROOT/lib/clm/stow.sh'
+    cmd_stow_add zsh
+  "
+  [ "$status" -eq 0 ]
+  [ -L "$CLM_TARGET/.zshrc" ]
+  [ "$(cat "$CLM_TARGET/.zshrc.clm-backup")" = "earlier backup, keep me" ]
+  [ -f "$CLM_TARGET/.zshrc.clm-backup.1" ]
+  [ "$(cat "$CLM_TARGET/.zshrc.clm-backup.1")" = "first conflict" ]
 }
 
 @test "cmd_stow_remove asks for confirmation and removes the symlink when confirmed" {
