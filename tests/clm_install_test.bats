@@ -143,7 +143,7 @@ EOF
   FAKE_UPSTREAM="$BATS_TEST_TMPDIR/fake-upstream/test-machine"
   mkdir -p "$FAKE_UPSTREAM/dotfiles/zsh" "$FAKE_UPSTREAM/vault/global/ssh/keys" "$FAKE_UPSTREAM/vault/bin" "$FAKE_UPSTREAM/pack"
   echo 'export FOO=1' > "$FAKE_UPSTREAM/dotfiles/zsh/.zshrc"
-  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$FAKE_UPSTREAM/vault/bin/fix-perms.sh"
+  cp "$BATS_TEST_DIRNAME/../lib/clm/templates/fix-perms.sh" "$FAKE_UPSTREAM/vault/bin/fix-perms.sh"
   chmod +x "$FAKE_UPSTREAM/vault/bin/fix-perms.sh"
   echo '# empty brewfile' > "$FAKE_UPSTREAM/pack/Brewfile"
 
@@ -173,7 +173,7 @@ EOF
   FAKE_UPSTREAM="$BATS_TEST_TMPDIR/fake-upstream/test-machine"
   mkdir -p "$FAKE_UPSTREAM/dotfiles/zsh" "$FAKE_UPSTREAM/vault/global/ssh/keys" "$FAKE_UPSTREAM/vault/bin" "$FAKE_UPSTREAM/pack"
   echo 'export FOO=1' > "$FAKE_UPSTREAM/dotfiles/zsh/.zshrc"
-  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$FAKE_UPSTREAM/vault/bin/fix-perms.sh"
+  cp "$BATS_TEST_DIRNAME/../lib/clm/templates/fix-perms.sh" "$FAKE_UPSTREAM/vault/bin/fix-perms.sh"
   chmod +x "$FAKE_UPSTREAM/vault/bin/fix-perms.sh"
 
   cat > "$FAKE_BIN/gh" <<EOF

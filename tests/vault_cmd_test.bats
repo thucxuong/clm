@@ -14,7 +14,7 @@ setup() {
 
 @test "clm vault fix-perms runs the vault's own fix-perms.sh" {
   mkdir -p "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
-  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
+  cp "$BATS_TEST_DIRNAME/../lib/clm/templates/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
   chmod +x "$CLM_VAULT/bin/fix-perms.sh"
   echo fake > "$CLM_VAULT/global/ssh/keys/id_ed25519"
   chmod 644 "$CLM_VAULT/global/ssh/keys/id_ed25519"

@@ -16,7 +16,7 @@ setup() {
   mkdir -p "$CLM_DOTFILES_DIR/zsh"
   echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"
   mkdir -p "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
-  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
+  cp "$BATS_TEST_DIRNAME/../lib/clm/templates/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
   chmod +x "$CLM_VAULT/bin/fix-perms.sh"
   settings_dir="$CLM_ROOT/settings"
   mkdir -p "$settings_dir/pack"
@@ -31,7 +31,7 @@ setup() {
   mkdir -p "$CLM_DOTFILES_DIR/zsh"
   echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"
   mkdir -p "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
-  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
+  cp "$BATS_TEST_DIRNAME/../lib/clm/templates/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
   chmod +x "$CLM_VAULT/bin/fix-perms.sh"
   settings_dir="$CLM_ROOT/settings"
   mkdir -p "$settings_dir/pack"
@@ -56,7 +56,7 @@ EOF
 @test "clm unpack installs casks into ~/Applications, not /Applications" {
   mkdir -p "$CLM_DOTFILES_DIR/zsh" "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
   echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"
-  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
+  cp "$BATS_TEST_DIRNAME/../lib/clm/templates/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
   chmod +x "$CLM_VAULT/bin/fix-perms.sh"
   settings_dir="$CLM_ROOT/settings"
   mkdir -p "$settings_dir/pack"
@@ -82,7 +82,7 @@ EOF
 @test "clm unpack restores npm globals, correctly stripping scoped and unscoped versions" {
   mkdir -p "$CLM_DOTFILES_DIR/zsh" "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
   echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"
-  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
+  cp "$BATS_TEST_DIRNAME/../lib/clm/templates/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
   chmod +x "$CLM_VAULT/bin/fix-perms.sh"
   settings_dir="$CLM_ROOT/settings"
   mkdir -p "$settings_dir/pack"
@@ -115,7 +115,7 @@ EOF
 @test "clm unpack skips npm restore gracefully when npm-global.txt is absent" {
   mkdir -p "$CLM_DOTFILES_DIR/zsh" "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
   echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"
-  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
+  cp "$BATS_TEST_DIRNAME/../lib/clm/templates/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
   chmod +x "$CLM_VAULT/bin/fix-perms.sh"
   settings_dir="$CLM_ROOT/settings"
   mkdir -p "$settings_dir/pack"
@@ -128,7 +128,7 @@ EOF
 @test "clm unpack skips npm restore gracefully when npm is not installed" {
   mkdir -p "$CLM_DOTFILES_DIR/zsh" "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
   echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"
-  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
+  cp "$BATS_TEST_DIRNAME/../lib/clm/templates/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
   chmod +x "$CLM_VAULT/bin/fix-perms.sh"
   settings_dir="$CLM_ROOT/settings"
   mkdir -p "$settings_dir/pack"
@@ -145,7 +145,7 @@ EOF
 @test "clm unpack restores pnpm globals from the dependencies section only" {
   mkdir -p "$CLM_DOTFILES_DIR/zsh" "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
   echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"
-  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
+  cp "$BATS_TEST_DIRNAME/../lib/clm/templates/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
   chmod +x "$CLM_VAULT/bin/fix-perms.sh"
   settings_dir="$CLM_ROOT/settings"
   mkdir -p "$settings_dir/pack"
@@ -181,7 +181,7 @@ EOF
 @test "clm unpack restores vscode extensions one per line" {
   mkdir -p "$CLM_DOTFILES_DIR/zsh" "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
   echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"
-  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
+  cp "$BATS_TEST_DIRNAME/../lib/clm/templates/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
   chmod +x "$CLM_VAULT/bin/fix-perms.sh"
   settings_dir="$CLM_ROOT/settings"
   mkdir -p "$settings_dir/pack"
@@ -208,7 +208,7 @@ EOF
 @test "clm unpack skips vscode restore gracefully when code is not installed" {
   mkdir -p "$CLM_DOTFILES_DIR/zsh" "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
   echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"
-  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
+  cp "$BATS_TEST_DIRNAME/../lib/clm/templates/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
   chmod +x "$CLM_VAULT/bin/fix-perms.sh"
   settings_dir="$CLM_ROOT/settings"
   mkdir -p "$settings_dir/pack"
@@ -225,7 +225,7 @@ EOF
 @test "clm unpack restores cursor extensions one per line" {
   mkdir -p "$CLM_DOTFILES_DIR/zsh" "$CLM_VAULT/global/ssh/keys" "$CLM_VAULT/bin"
   echo 'x' > "$CLM_DOTFILES_DIR/zsh/.zshrc"
-  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
+  cp "$BATS_TEST_DIRNAME/../lib/clm/templates/fix-perms.sh" "$CLM_VAULT/bin/fix-perms.sh"
   chmod +x "$CLM_VAULT/bin/fix-perms.sh"
   settings_dir="$CLM_ROOT/settings"
   mkdir -p "$settings_dir/pack"

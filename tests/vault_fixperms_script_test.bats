@@ -3,7 +3,7 @@
 @test "fix-perms sets 700 on key dirs and 600 on key files, global and per-project" {
   root="$BATS_TEST_TMPDIR/vault"
   mkdir -p "$root/global/ssh/keys" "$root/projects/acme/ssh/keys" "$root/bin"
-  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$root/bin/fix-perms.sh"
+  cp "$BATS_TEST_DIRNAME/../lib/clm/templates/fix-perms.sh" "$root/bin/fix-perms.sh"
   chmod +x "$root/bin/fix-perms.sh"
   echo "fake" > "$root/global/ssh/keys/id_ed25519"
   chmod 644 "$root/global/ssh/keys/id_ed25519"
@@ -21,7 +21,7 @@
 @test "fix-perms does not error when a project has no keys directory yet" {
   root="$BATS_TEST_TMPDIR/vault"
   mkdir -p "$root/global/ssh/keys" "$root/projects/emptyproj/ssh" "$root/bin"
-  cp "$BATS_TEST_DIRNAME/fixtures/fix-perms.sh" "$root/bin/fix-perms.sh"
+  cp "$BATS_TEST_DIRNAME/../lib/clm/templates/fix-perms.sh" "$root/bin/fix-perms.sh"
   chmod +x "$root/bin/fix-perms.sh"
 
   run "$root/bin/fix-perms.sh" "$root"
