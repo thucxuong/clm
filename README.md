@@ -6,7 +6,7 @@ from your actual settings, which live in a separate repo, `cl-settings`.
 
 ## First-time setup on a new machine
 
-    curl -fsSL https://raw.githubusercontent.com/thucxuong/clm/main/bootstrap.sh | sh -s -- thucxuong/cl-settings
+    curl -fsSL https://raw.githubusercontent.com/thucxuong/clm/main/bootstrap.sh | sh -s -- you/your-settings-repo
 
 That's it — one command. It clones `~/clm`, then hands off to
 `clm-install.sh`: Homebrew, Stow, and `gh` get installed if missing,
