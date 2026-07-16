@@ -19,10 +19,12 @@ blip, closed terminal mid-`gh auth login`), just run the same command
 again — nothing gets redone unnecessarily, and it picks up wherever it
 left off.
 
-`clm` itself goes on `PATH` via a line in your own `zsh/.zshrc` (part of
-`cl-settings`, stowed during `clm unpack`) — not via Homebrew, so it isn't
-tied to wherever Homebrew happens to live. Open a new terminal after the
-first run for that to take effect.
+`clm` itself goes on `PATH` via a line `clm-install.sh` adds to
+`~/.zshenv` (not via Homebrew, and not via `cl-settings`/Stow either) —
+zsh reads `.zshenv` on every invocation, so this is set up before
+anything that could fail (like `cl-settings` not yet having a folder for
+a brand-new machine) has a chance to block it. Open a new terminal after
+the first run for that to take effect.
 
 Prefer to inspect before piping to `sh`? The equivalent two-step version:
 
@@ -45,14 +47,17 @@ after `clm unpack` has run.
 If this is a genuinely new machine — not a reinstall of one already in
 `cl-settings` — `clm unpack` will correctly say `cl-settings not found`
 for *this* machine's subfolder, even though `cl-settings` itself cloned
-fine. Scaffold it first:
+fine. `clm-install.sh` will already have added `clm` to `~/.zshenv`
+before that failure though, so **open a new terminal first**, then:
 
     clm settings new --from <existing-machine-name>
-    clm unpack
+    clm-install.sh thucxuong/cl-settings
 
-`--from` copies that machine's dotfiles as an editable starting point.
-`vault/` and `pack/` always start empty — add real SSH keys yourself
-under `cl-settings/<this-machine>/vault/`, then run `clm vault fix-perms`.
+(Re-running `clm-install.sh` is resumable — it skips everything already
+done and picks up at `clm unpack`, which now succeeds.) `--from` copies
+that machine's dotfiles as an editable starting point. `vault/` always
+starts empty — add real SSH keys yourself under
+`cl-settings/<this-machine>/vault/`, then run `clm vault fix-perms`.
 
 ## Layout
 
