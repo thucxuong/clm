@@ -368,3 +368,36 @@ canonical source moves from `tests/fixtures/fix-perms.sh` (test-only) to
 `lib/clm/templates/fix-perms.sh` (a real runtime resource, now used by both
 `clm settings new` and the test suite) — tests are updated to reference the
 new canonical path instead of keeping a second, potentially-drifting copy.
+
+## Addendum (2026-07-16): `clm`'s PATH must not depend on `clm unpack` succeeding
+
+Real usage on a genuinely new machine surfaced a sequencing bug: the plan
+to put `clm`'s `PATH` line in `cl-settings/zsh/.zshrc` (the "decouple from
+Homebrew" addendum from earlier the same day) only takes effect once
+`clm unpack`'s `cmd_stow_onboard` step actually symlinks that file to
+`~/.zshrc`. But `cmd_unpack` dies at its very first check — "cl-settings
+not found" for *this* machine's subfolder — before `cmd_stow_onboard` ever
+runs, on exactly the new-machine case this whole flow needs to handle.
+Net effect: after a first run that hits the missing-machine-folder error,
+`clm` is not on `PATH` even in a fresh shell, forcing the user to type the
+full path (`~/clm/bin/clm`) to run `clm settings new` at all.
+
+### Fix: own a file Stow will never manage
+
+zsh reads `~/.zshenv` on *every* invocation (interactive or not, login or
+not) — and unlike `~/.zshrc`, it is not one of the files `cl-settings`
+tracks or Stow symlinks. `clm-install.sh` can safely create/append to it
+directly with zero conflict risk against the later real `.zshrc` stow:
+
+- New `ensure_clm_on_path()`, idempotent (checks the exact line isn't
+  already present before appending), writes
+  `export PATH="$HOME/clm/bin:$PATH"` to `${CLM_ZSHENV:-$HOME/.zshenv}`
+  (env-overridable for tests, mirroring the rest of the codebase's
+  `CLM_*` override pattern).
+- Called early in `main()` — right after `chmod +x bin/clm`, **before**
+  `ensure_gh_auth`/`ensure_cl_settings`/`clm unpack` — so `clm` ends up on
+  `PATH` (after a new shell) regardless of whether the rest of the flow
+  succeeds.
+- The earlier plan to add this line to `cl-settings/zsh/.zshrc` is
+  retracted — it's now redundant (harmless if present, but no longer
+  needed) since `.zshenv` alone guarantees it unconditionally.
